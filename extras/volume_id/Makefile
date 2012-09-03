@@ -9,7 +9,7 @@ PROG = vol_id
 GEN_HEADERS =
 MAN_PAGES = vol_id.8
 
-prefix =
+prefix = $(TARGETDIR)
 etcdir =	${prefix}/etc
 sbindir =	${prefix}/sbin
 usrbindir =	${prefix}/usr/bin
@@ -61,6 +61,7 @@ clean:
 
 install-bin: all
 	$(INSTALL_PROGRAM) -D $(PROG) $(DESTDIR)$(libudevdir)/$(PROG)
+	$(STRIP) $(DESTDIR)$(libudevdir)/$(PROG)
 	$(MAKE) -C lib install
 .PHONY: install-bin
 

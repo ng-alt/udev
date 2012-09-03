@@ -286,6 +286,25 @@ int main(int argc, char *argv[])
 		printf("ID_FS_UUID=%s\n", uuid);
 		printf("ID_FS_UUID_ENC=%s\n", uuid_enc);
 		printf("ID_FS_LABEL=%s\n", label);
+        /* , add-start by MJ., for replacing mtools for downsizing, 2011.02.21 */
+        #define USB_VOL_NAME_FILE   "/tmp/usb_vol_name/%s"
+        FILE *fp = NULL;
+        char *devname;
+        char filename[64];
+
+        if(strlen(node)){
+            devname = strstr(node, "sd");
+            if(devname){
+                sprintf(filename, USB_VOL_NAME_FILE, devname);
+                fp = fopen(filename, "w");
+                if (fp != NULL) {
+                    fprintf(fp, "%s\n", label);
+                    fclose(fp);
+                }
+            }
+        }
+
+        /* , add-stop by MJ., 2011.02.21. */
 		printf("ID_FS_LABEL_ENC=%s\n", label_enc);
 		printf("ID_FS_LABEL_SAFE=%s\n", label_safe);
 		break;

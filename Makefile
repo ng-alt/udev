@@ -38,6 +38,7 @@ USE_STATIC = false
 # to build any of the extras programs pass:
 #  make EXTRAS="extras/<extra1> extras/<extra2>"
 EXTRAS =
+EXTRAS = extras/volume_id
 
 # make the build silent
 V =
@@ -52,6 +53,9 @@ PROGRAMS = \
 	udevtest			\
 	test-udev			\
 	udevstart
+
+# We only need udevtrigger for now
+PROGRAMS = udevtrigger
 
 HEADERS = \
 	udev.h				\
@@ -101,7 +105,7 @@ configdir =	${etcdir}/udev
 udevdir =	/dev
 DESTDIR =
 
-INSTALL = install -c
+INSTALL = install
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_SCRIPT = ${INSTALL}
@@ -116,7 +120,7 @@ RANLIB = $(CROSS_COMPILE)ranlib
 CFLAGS		+= -g -Wall -pipe -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64
 WARNINGS	= -Wstrict-prototypes -Wsign-compare -Wshadow \
 		  -Wchar-subscripts -Wmissing-declarations -Wnested-externs \
-		  -Wpointer-arith -Wcast-align -Wsign-compare -Wmissing-prototypes
+		  -Wpointer-arith -Wsign-compare -Wmissing-prototypes
 CFLAGS		+= $(WARNINGS)
 
 LDFLAGS += -Wl,-warn-common
@@ -158,7 +162,7 @@ else
 endif
 export E Q
 
-all: $(PROGRAMS) $(MAN_PAGES)
+all: $(PROGRAMS)
 	$(Q) extras="$(EXTRAS)"; for target in $$extras; do \
 		$(MAKE) CC="$(CC)" \
 			CFLAGS="$(CFLAGS)" \
@@ -268,6 +272,16 @@ uninstall-man:
 	done;
 .PHONY: uninstall-man
 
+install-udevtrigger:
+	$(INSTALL) -d $(DESTDIR)$(udevdir)
+	$(INSTALL) -d $(DESTDIR)$(configdir)
+	$(INSTALL_DATA) etc/udev/udev.conf $(DESTDIR)$(configdir)
+	$(INSTALL_PROGRAM) -D udevtrigger $(DESTDIR)$(sbindir)/udevtrigger
+	$(STRIP) $(DESTDIR)$(sbindir)/udevtrigger
+	@extras="$(EXTRAS)"; for target in $$extras; do \
+		$(MAKE) -C $$target install-bin || exit 1; \
+	done;
+
 install-bin:
 	$(INSTALL) -d $(DESTDIR)$(udevdir)
 	$(INSTALL_PROGRAM) -D udevd $(DESTDIR)$(sbindir)/udevd
@@ -304,7 +318,7 @@ endif
 	done;
 .PHONY: uninstall-bin
 
-install: all install-bin install-config install-man
+install: all install-bin
 .PHONY: install
 
 uninstall: uninstall-bin uninstall-man
